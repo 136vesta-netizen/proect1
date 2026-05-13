@@ -10,6 +10,8 @@ class Category extends Model
     use Sluggable;
     use HasFactory;
 
+    protected $fillable = ['title'];
+
     public function posts()
     {
         return $this->hasMany(Post::class);
