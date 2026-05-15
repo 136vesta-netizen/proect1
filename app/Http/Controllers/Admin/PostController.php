@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -35,13 +36,28 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => 'required',
+            'title'       => 'required',
+            'description' => 'required',
+            'content'     => 'required',
+            'category_id' => 'required|integer',
+            'thumbnail'   => 'nullable|image',
         ]);
 
-        Post::create($request->all());
+        $data = $request->all();
+
+        $data['thumbnail'] = Post::uploadImage($request);
+
+        if ($request->hasFile('thumbnail')) {
+            $folder = date('Y-m-d');
+            $data['thumbnail'] = $request->file('thumbnail')->store("images/{$folder}", 'public');
+        }
+
+        $post = Post::create($data);
+        $post->tags()->sync($request->tags);
 
         return redirect()->route('posts.index')->with('success', 'Статья добавлена');
     }
+
 
     /**
      * Display the specified resource.
@@ -56,7 +72,10 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        return view('admin.posts.edit');
+        $post = Post::find($id);
+        $categories = Category::pluck('title', 'id')->all();
+        $tags = Tag::pluck('title', 'id')->all();
+        return view('admin.posts.edit', compact('post', 'categories', 'tags'));
     }
 
     /**
@@ -65,11 +84,23 @@ class PostController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'title' => 'required',
+            'title'       => 'required',
+            'description' => 'required',
+            'content'     => 'required',
+            'category_id' => 'required|integer',
+            'thumbnail'   => 'nullable|image',
         ]);
+
+        $post = Post::find($id);
+        $data = $request->all();
+        $data['thumbnail'] = Post::uploadImage($request, $post->thumbnail);
+
+        $post->update($data);
+        $post->tags()->sync($request->tags);
 
         return redirect()->route('posts.index')->with('success', 'Изменения сохранены');
     }
+
 
     /**
      * Remove the specified resource from storage.
