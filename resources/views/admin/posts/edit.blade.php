@@ -39,6 +39,7 @@
                                     @error('title') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
+
                                 <div class="form-group">
                                     <label for="description">Аннотация</label>
                                     <textarea name="description" class="form-control @error('description') is-invalid @enderror" id="description" rows="3">{{ $post->description }}</textarea>
@@ -50,6 +51,7 @@
                                     <textarea name="content" class="form-control @error('content') is-invalid @enderror" id="content" rows="7">{{ $post->content }}</textarea>
                                     @error('content') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
+
 
                                 <div class="form-group">
                                     <label for="category_id">Категория</label>
